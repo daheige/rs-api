@@ -1,0 +1,21 @@
+[package]
+name = "rs-api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "job"
+path = "src/job.rs"
+
+[dependencies]
+axum = "0.6.18"
+tokio = { version = "1.28.0", features = ["full"] }
+serde = { version = "1.0.162", features = ["derive"] }
+serde_json = "1.0.96"
+serde_yaml = "0.9.21"
+
+
+
+
