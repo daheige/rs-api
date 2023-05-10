@@ -9,9 +9,12 @@ pub static APP_CONFIG: Lazy<AppConfig> = Lazy::new(|| {
     c.load().expect("read file failed");
 
     // read config to struct
-    let s: AppConfig = serde_yaml::from_str(c.content()).unwrap();
-    println!("{:?}", s);
-    s
+    let conf: AppConfig = serde_yaml::from_str(c.content()).unwrap();
+    if conf.app_debug {
+        println!("{:?}", conf);
+    }
+
+    conf
 });
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
