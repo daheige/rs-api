@@ -24,9 +24,10 @@ async fn main() {
         println!("set success");
     }
 
-    // creat axum router
     let address: SocketAddr = "127.0.0.1:1338".parse().unwrap();
     println!("app run on:{}", address.to_string());
+
+    // create axum router
     let router = routes::router::api_router();
 
     // run app
