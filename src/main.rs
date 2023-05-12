@@ -1,5 +1,6 @@
 use redis::Commands;
 use redis::RedisResult;
+use std::net::SocketAddr;
 
 // 定义项目相关module
 mod config;
@@ -8,7 +9,8 @@ mod middleware;
 mod routes;
 mod services;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("Hello, world!");
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
     let mut conn = config::REDIS_POOL.get().unwrap();
@@ -21,4 +23,15 @@ fn main() {
     } else {
         println!("set success");
     }
+
+    // creat axum router
+    let address: SocketAddr = "127.0.0.1:1338".parse().unwrap();
+    println!("app run on:{}", address.to_string());
+    let router = routes::router::api_router();
+
+    // run app
+    axum::Server::bind(&address)
+        .serve(router.into_make_service())
+        .await
+        .unwrap();
 }
