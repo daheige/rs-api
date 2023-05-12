@@ -4,6 +4,7 @@ use std::net::SocketAddr;
 
 // 定义项目相关module
 mod config;
+mod entity;
 mod handlers;
 mod middleware;
 mod routes;
