@@ -67,7 +67,12 @@ pub async fn html_foo() -> Html<&'static str> {
 }
 
 // Content-Type: application/x-www-form-urlencoded
-pub async fn accept_form(Form(input): Form<user::UserForm>) -> impl IntoResponse {
+// pub async fn accept_form(Form(input): Form<user::UserForm>) -> impl IntoResponse {
+pub async fn accept_form(
+    headers: HeaderMap,
+    Form(input): Form<user::UserForm>,
+) -> impl IntoResponse {
+    println!("headers: {:?}", headers);
     println!("current input:{:?}", input);
     (
         StatusCode::OK,
