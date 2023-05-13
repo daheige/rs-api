@@ -12,7 +12,8 @@ pub fn api_router() -> Router {
         .route("/", get(handlers::index::root))
         .route("/empty-array", get(handlers::index::empty_array))
         .route("/users", post(handlers::index::create_user))
-        .route("/html", get(handlers::index::html_foo));
+        .route("/html", get(handlers::index::html_foo))
+        .route("/form", post(handlers::index::accept_form));
 
     // handler not found
     app = app.fallback(not_found_handler);

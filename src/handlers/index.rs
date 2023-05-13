@@ -3,8 +3,7 @@ use crate::services::user as userService;
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse},
-    Json,
-    // ServiceExt,
+    Form, Json,
 };
 
 // basic handler that responds with a static string
@@ -64,4 +63,17 @@ pub async fn empty_array() -> impl IntoResponse {
 // returns html entity
 pub async fn html_foo() -> Html<&'static str> {
     Html("<h1>hello,rs-api</h1>")
+}
+
+// Content-Type: application/x-www-form-urlencoded
+pub async fn accept_form(Form(input): Form<user::UserForm>) -> impl IntoResponse {
+    println!("current input:{:?}", input);
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(input),
+        }),
+    )
 }

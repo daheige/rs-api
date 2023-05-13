@@ -12,3 +12,18 @@ pub struct User {
     pub id: u64,
     pub username: String,
 }
+
+// form data
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserForm {
+    #[serde(default)]
+    name: String,
+
+    // The default value is ""
+    // if this parameter is not specified, this parameter is mandatory
+    #[serde(default)]
+    email: String,
+
+    #[serde(default)]
+    age: i32,
+}
