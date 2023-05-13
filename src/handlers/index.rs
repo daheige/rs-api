@@ -2,7 +2,7 @@ use crate::entity::user;
 use crate::services::user as userService;
 use axum::{
     http::StatusCode,
-    response::IntoResponse,
+    response::{Html, IntoResponse},
     Json,
     // ServiceExt,
 };
@@ -59,4 +59,9 @@ pub async fn empty_array() -> impl IntoResponse {
             data: Some(empty_arr),
         }),
     )
+}
+
+// returns html entity
+pub async fn html_foo() -> Html<&'static str> {
+    Html("<h1>hello,rs-api</h1>")
 }
