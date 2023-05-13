@@ -1,6 +1,7 @@
-use redis::Commands;
-use redis::RedisResult;
 use std::net::SocketAddr;
+use std::process;
+use std::time::Duration;
+use tokio::signal;
 
 // 定义项目相关module
 mod config;
@@ -14,16 +15,7 @@ mod services;
 async fn main() {
     println!("Hello, world!");
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
-    let mut conn = config::REDIS_POOL.get().unwrap();
-
-    // 设置单个pool timeout
-    // let mut conn = pool.get_timeout(Duration::from_secs(2)).unwrap();
-    let res: RedisResult<String> = conn.set("my_user", "daheige");
-    if res.is_err() {
-        println!("redis set error:{}", res.err().unwrap().to_string());
-    } else {
-        println!("set success");
-    }
+    println!("current process pid:{}", process::id());
 
     let address: SocketAddr = "127.0.0.1:1338".parse().unwrap();
     println!("app run on:{}", address.to_string());
@@ -34,6 +26,40 @@ async fn main() {
     // run app
     axum::Server::bind(&address)
         .serve(router.into_make_service())
+        .with_graceful_shutdown(graceful_shutdown())
         .await
         .unwrap();
+}
+
+// graceful shutdown
+async fn graceful_shutdown() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install ctrl+c handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c =>{
+            println!("received ctrl_c signal,server will exist...");
+            tokio::time::sleep(Duration::from_secs(config::APP_CONFIG.graceful_wait_time)).await;
+        },
+        _ = terminate => {
+            println!("received terminate signal,server will exist...");
+            tokio::time::sleep(Duration::from_secs(config::APP_CONFIG.graceful_wait_time)).await;
+        },
+    }
+
+    println!("signal received,starting graceful shutdown");
 }

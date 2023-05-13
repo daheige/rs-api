@@ -1,6 +1,10 @@
+# app config
 app_name: rs-api
 app_debug: true
 app_port: 1338
+graceful_wait_time: 5
+
+# redis config
 redis_conf:
     dsn: "redis://:@127.0.0.1:6379/0"
     max_size: 200

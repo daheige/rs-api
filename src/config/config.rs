@@ -23,4 +23,5 @@ pub struct AppConfig {
     pub app_debug: bool,
     pub app_name: String,
     pub app_port: i32,
+    pub graceful_wait_time: u64,
 }

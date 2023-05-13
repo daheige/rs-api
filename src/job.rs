@@ -1,5 +1,6 @@
 use redis::Commands;
 use redis::RedisResult;
+use std::process;
 
 mod config;
 mod services;
@@ -7,6 +8,8 @@ mod services;
 fn main() {
     println!("job exec...");
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
+    println!("current process pid:{}", process::id());
+
     let mut conn = config::REDIS_POOL.get().unwrap();
 
     // 设置单个pool timeout
