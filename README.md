@@ -98,12 +98,12 @@ response
 # get header
 from axum::http::HeaderMap
 ```rust
- let ua = headers
+let ua = headers
         .get(header::USER_AGENT)
         .and_then(|v| v.to_str().ok())
         .map(|v| v.to_string())
         .unwrap();
-    println!("user-agent:{}", ua);
+println!("user-agent:{}", ua);
 
 // eg: this code
 // Content-Type: application/x-www-form-urlencoded
