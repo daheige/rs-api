@@ -148,5 +148,8 @@ exec end,request_id:f1d720c8-2eab-408a-bd0a-41c924512d7f,exec_time:0ms
 # axum framework
 https://github.com/tokio-rs/axum
 
+# rs-rpc
+https://github.com/daheige/rs-rpc
+
 # License
 MIT
