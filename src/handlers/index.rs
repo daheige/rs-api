@@ -2,10 +2,12 @@ use crate::entity::user;
 use crate::services::user as userService;
 use axum::http::{header, HeaderMap};
 use axum::{
+    extract::{Path, Query},
     http::StatusCode,
     response::{Html, IntoResponse},
     Form, Json,
 };
+use std::collections::HashMap;
 
 // basic handler that responds with a static string
 pub async fn root() -> &'static str {
@@ -61,11 +63,24 @@ pub async fn empty_array() -> impl IntoResponse {
     )
 }
 
+pub async fn empty_object() -> impl IntoResponse {
+    let empty_object = super::EmptyObject {};
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(empty_object),
+        }),
+    )
+}
+
 // returns html entity
 pub async fn html_foo() -> Html<&'static str> {
     Html("<h1>hello,rs-api</h1>")
 }
 
+// get params from form request
 // Content-Type: application/x-www-form-urlencoded
 // pub async fn accept_form(Form(input): Form<user::UserForm>) -> impl IntoResponse {
 pub async fn accept_form(
@@ -152,4 +167,49 @@ pub async fn get_user_cookie(headers: HeaderMap) -> impl IntoResponse {
             data: Some(username),
         }),
     ))
+}
+
+// extract::{Path, Query} for query params and path params
+
+/// get path params
+/// /user/:id
+/// eg: /user/123
+pub async fn user_info(Path(id): Path<i64>) -> String {
+    format!("user id:{}", id)
+}
+
+/// /repo/:repo/:id
+/// eg: /repo/user/daheige
+pub async fn repo_info(Path((repo, name)): Path<(String, String)>) -> String {
+    format!("repo:{},name:{}", repo, name)
+}
+
+// query_user?id=1&username=daheige
+pub async fn query_user(Query(args): Query<user::User>) -> String {
+    format!("user id:{},username:{}", args.id, args.username)
+}
+
+/// bind params to option struct
+/// eg:query_user_opt?id=1&username=daheige
+pub async fn query_user_opt(args: Option<Query<user::User>>) -> String {
+    if let Some(args) = args {
+        let user = args.0;
+        return format!("user id:{},username:{}", user.id, user.username);
+    }
+
+    "query user params invalid".to_string()
+}
+
+// option params default value
+// eg: /query_user_opt_done?id=1&username=daheige
+pub async fn query_user_opt_done(Query(args): Query<user::UserOpt>) -> String {
+    let id = args.id.unwrap_or(0);
+    let username = args.username.unwrap_or("".to_string());
+    format!("user id:{},username:{}", id, username)
+}
+
+/// get all query params
+/// eg: /all-query?id=1&username=daheige
+pub async fn all_query(Query(args): Query<HashMap<String, String>>) -> String {
+    format!("all query:{:?}", args)
 }

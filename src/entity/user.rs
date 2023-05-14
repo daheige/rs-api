@@ -7,10 +7,16 @@ pub struct CreateUser {
 }
 
 // the output to our `create_user` handler
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct User {
     pub id: u64,
     pub username: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserOpt {
+    pub id: Option<i64>,
+    pub username: Option<String>,
 }
 
 // form data

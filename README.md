@@ -73,6 +73,19 @@ response
 }
 ```
 
+GET http://localhost:1338/empty-object
+```shell
+curl --location --request GET 'localhost:1338/empty-object'
+```
+response
+```json
+{
+    "code": 0,
+    "message": "ok",
+    "data": {}
+}
+```
+
 GET http://localhost:1338/html
 ```shell
 curl --location --request GET 'localhost:1338/html'
@@ -118,3 +131,9 @@ pub async fn accept_form(
     )
 }
 ```
+
+# More usage
+please see handlers/index.rs
+
+# License
+MIT
