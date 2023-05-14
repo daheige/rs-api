@@ -1,8 +1,9 @@
-use redis::Commands;
-use redis::RedisResult;
+use crate::entity::user;
+use crate::services::user as userService;
 use std::process;
 
 mod config;
+mod entity;
 mod services;
 
 fn main() {
@@ -10,13 +11,14 @@ fn main() {
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
     println!("current process pid:{}", process::id());
 
-    let mut conn = config::REDIS_POOL.get().unwrap();
+    let user = user::User {
+        id: 1,
+        username: "daheige".to_string(),
+    };
 
-    // 设置单个pool timeout
-    // let mut conn = pool.get_timeout(Duration::from_secs(2)).unwrap();
-    let res: RedisResult<String> = conn.set("my_user", "daheige");
+    let res = userService::set_user(&user);
     if res.is_err() {
-        println!("redis set error:{}", res.err().unwrap().to_string());
+        println!("set user error:{}", res.err().unwrap().to_string());
     } else {
         println!("set success");
     }

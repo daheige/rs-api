@@ -1,6 +1,8 @@
 use crate::handlers;
+use crate::middleware as ware;
 use axum::{
     http::StatusCode,
+    middleware,
     response::IntoResponse,
     routing::{get, post},
     Router,
@@ -26,7 +28,8 @@ pub fn api_router() -> Router {
             "/query_user_opt_done",
             get(handlers::index::query_user_opt_done),
         )
-        .route("/all-query", get(handlers::index::all_query));
+        .route("/all-query", get(handlers::index::all_query))
+        .layer(middleware::from_fn(ware::access_log));
 
     // handler not found
     app = app.fallback(not_found_handler);

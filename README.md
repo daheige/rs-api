@@ -16,6 +16,11 @@ rust web api application
 └── mod.rs
 ```
 
+# run
+```shell
+cargo run --bin rs-api
+```
+
 Visit home page: http://localhost:1338/
 ```html
 Hello, World!
@@ -131,9 +136,14 @@ pub async fn accept_form(
     )
 }
 ```
-
-# More usage
+# handlers usage
 please see handlers/index.rs
+
+# access_log middleware
+```
+exec begin method:GET uri:/empty-object?id=1 path:/empty-object request body:Body(Empty) query:Some("id=1") ua:PostmanRuntime/7.26.8 request_id:f1d720c8-2eab-408a-bd0a-41c924512d7f
+exec end,request_id:f1d720c8-2eab-408a-bd0a-41c924512d7f,exec_time:0ms
+```
 
 # License
 MIT
