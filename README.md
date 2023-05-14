@@ -81,3 +81,40 @@ response
 ```html
 <h1>hello,rs-api</h1>
 ```
+
+# get header
+from axum::http::HeaderMap
+```rust
+ let ua = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.to_string())
+        .unwrap();
+    println!("user-agent:{}", ua);
+
+// eg: this code
+// Content-Type: application/x-www-form-urlencoded
+// pub async fn accept_form(Form(input): Form<user::UserForm>) -> impl IntoResponse {
+pub async fn accept_form(
+    headers: HeaderMap,
+    Form(input): Form<user::UserForm>,
+) -> impl IntoResponse {
+    println!("headers: {:?}", headers);
+    let ua = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.to_string())
+        .unwrap();
+    println!("user-agent:{}", ua);
+
+    println!("current input:{:?}", input);
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(input),
+        }),
+    )
+}
+```

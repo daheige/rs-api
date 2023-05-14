@@ -73,6 +73,13 @@ pub async fn accept_form(
     Form(input): Form<user::UserForm>,
 ) -> impl IntoResponse {
     println!("headers: {:?}", headers);
+    let ua = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(|v| v.to_string())
+        .unwrap();
+    println!("user-agent:{}", ua);
+
     println!("current input:{:?}", input);
     (
         StatusCode::OK,
