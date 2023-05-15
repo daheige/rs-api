@@ -1,8 +1,14 @@
 # rs-api
 rust web(api)/job/rpc application
 
-- cron job crate: https://github.com/rs-god/rcron
-- rs-grpc project: https://github.com/daheige/rs-rpc
+# related crates
+- axum: https://crates.io/crates/axum https://github.com/tokio-rs/axum
+- tokio: https://crates.io/crates/tokio https://github.com/tokio-rs/tokio
+- serde: https://crates.io/crates/serde https://github.com/serde-rs/serde
+- redis: https://crates.io/crates/redis https://github.com/redis-rs/redis-rs
+- rs-infras: https://github.com/rs-god/rs-infras
+- rust cron job: https://github.com/rs-god/rcron
+- rust grpc project: https://github.com/daheige/rs-rpc
 
 # layout
 ```
@@ -147,9 +153,6 @@ please see handlers/index.rs
 exec begin method:GET uri:/empty-object?id=1 path:/empty-object request body:Body(Empty) query:Some("id=1") ua:PostmanRuntime/7.26.8 request_id:f1d720c8-2eab-408a-bd0a-41c924512d7f
 exec end,request_id:f1d720c8-2eab-408a-bd0a-41c924512d7f,exec_time:0ms
 ```
-
-# axum framework
-https://github.com/tokio-rs/axum
 
 # License
 MIT
