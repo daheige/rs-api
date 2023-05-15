@@ -17,7 +17,7 @@ async fn main() {
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
     println!("current process pid:{}", process::id());
 
-    let address: SocketAddr = "127.0.0.1:1338".parse().unwrap();
+    let address: SocketAddr = format!("0.0.0.0:{}", config::APP_CONFIG.app_port).parse().unwrap();
     println!("app run on:{}", address.to_string());
 
     // create axum router
