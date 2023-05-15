@@ -1,7 +1,7 @@
 use axum::{
     http::{
         header::{self, AsHeaderName},
-        HeaderMap, Request,
+        HeaderMap, HeaderValue, Request,
     },
     middleware::Next,
     response::IntoResponse,
@@ -34,6 +34,20 @@ where
         "exec begin method:{} uri:{} path:{} request body:{:?} query:{:?} ua:{} request_id:{}",
         method, uri, path, body, query, ua, request_id,
     );
+
+    // insert x-request-id into headers
+    let (mut parts, body) = req.into_parts();
+    // parts
+    //     .headers
+    //     .insert("x-request-id", request_id.parse().unwrap());
+
+    parts.headers.insert(
+        "x-request-id",
+        HeaderValue::from_str(request_id.as_str()).unwrap(),
+    );
+
+    // change request with new parts and body
+    let req = Request::from_parts(parts, body);
 
     // handler request
     let response = next.run(req).await;
