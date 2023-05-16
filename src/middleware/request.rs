@@ -31,7 +31,7 @@ where
 
     // println!("request:{:?}", req);
     println!(
-        "exec begin method:{} uri:{} path:{} request body:{:?} query:{:?} ua:{} request_id:{}",
+        "exec begin,method:{} uri:{} path:{} request body:{:?} query:{:?} ua:{} request_id:{}",
         method, uri, path, body, query, ua, request_id,
     );
 
