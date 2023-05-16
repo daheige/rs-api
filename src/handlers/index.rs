@@ -1,3 +1,5 @@
+use super::validate_form::NameInput;
+use super::validate_form::ValidatedForm;
 use crate::entity::user;
 use crate::services::user as userService;
 use axum::http::{header, HeaderMap};
@@ -212,4 +214,19 @@ pub async fn query_user_opt_done(Query(args): Query<user::UserOpt>) -> String {
 /// eg: /all-query?id=1&username=daheige
 pub async fn all_query(Query(args): Query<HashMap<String, String>>) -> String {
     format!("all query:{:?}", args)
+}
+
+/// validate input name
+/// /validate
+/// /validate?name=
+/// /validate?name=daheige
+pub async fn validate_name(ValidatedForm(input): ValidatedForm<NameInput>) -> impl IntoResponse {
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(format!("hello,{}!", input.name)),
+        }),
+    )
 }

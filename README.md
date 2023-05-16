@@ -145,6 +145,48 @@ pub async fn accept_form(
     )
 }
 ```
+
+# validate middleware
+handlers/validate_form.rs
+
+```shell
+curl --location --request GET 'http://localhost:1338/validate?name='
+```
+response:
+```json
+{
+    "code": 1001,
+    "message": "input validation error: [name: can not be empty]",
+    "data": {}
+}
+```
+
+invalid param
+```shell
+curl --location --request GET 'http://localhost:1338/validate'
+```
+response:
+```json
+{
+  "code": 500,
+  "message": "param error:Failed to deserialize form",
+  "data": {}
+}
+```
+
+valid param
+```shell
+curl --location --request GET 'http://localhost:1338/validate?name=daheige'
+```
+response:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": "hello,daheige!"
+}
+```
+
 # handlers usage
 please see handlers/index.rs
 

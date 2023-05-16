@@ -3,7 +3,7 @@ use std::process;
 use std::time::Duration;
 use tokio::signal;
 
-// 定义项目相关module
+// define module
 mod config;
 mod entity;
 mod handlers;

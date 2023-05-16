@@ -29,6 +29,7 @@ pub fn api_router() -> Router {
             get(handlers::index::query_user_opt_done),
         )
         .route("/all-query", get(handlers::index::all_query))
+        .route("/validate", get(handlers::index::validate_name))
         .layer(middleware::from_fn(ware::access_log));
 
     // handler not found

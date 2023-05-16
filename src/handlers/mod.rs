@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod index;
+pub mod validate_form;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct Reply<T> {
