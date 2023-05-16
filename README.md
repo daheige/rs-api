@@ -146,7 +146,7 @@ pub async fn accept_form(
 }
 ```
 
-# validate middleware
+# validate middleware for handlers
 handlers/validate_form.rs
 
 ```shell
