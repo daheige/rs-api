@@ -50,7 +50,7 @@ where
     let req = Request::from_parts(parts, body);
 
     // handler request
-    let response = next.run(req).await;
+    let mut response = next.run(req).await;
 
     // exec request end
     let end_time = Instant::now();
@@ -58,6 +58,12 @@ where
         "exec end,request_id:{},exec_time:{}ms",
         request_id,
         end_time.sub(start_time).as_millis(),
+    );
+
+    // set x-request-id to headers
+    response.headers_mut().insert(
+        "x-request-id",
+        HeaderValue::from_str(request_id.as_str()).unwrap(),
     );
 
     response
