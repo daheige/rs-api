@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod index;
+pub mod json_or_form;
 pub mod validate_form;
 
 #[derive(Deserialize, Serialize, Debug)]

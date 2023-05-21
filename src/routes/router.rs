@@ -30,6 +30,7 @@ pub fn api_router() -> Router {
         )
         .route("/all-query", get(handlers::index::all_query))
         .route("/validate", get(handlers::index::validate_name))
+        .route("/json_or_form", post(handlers::index::json_or_form))
         .layer(middleware::from_fn(ware::access_log))
         .layer(middleware::from_fn(ware::no_cache_header));
 

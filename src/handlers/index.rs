@@ -1,3 +1,4 @@
+use super::json_or_form::JsonOrForm;
 use super::validate_form::NameInput;
 use super::validate_form::ValidatedForm;
 use crate::entity::user;
@@ -9,7 +10,11 @@ use axum::{
     response::{Html, IntoResponse},
     Form, Json,
 };
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+// validate error
+use validator::Validate;
 
 // basic handler that responds with a static string
 pub async fn root() -> &'static str {
@@ -227,6 +232,24 @@ pub async fn validate_name(ValidatedForm(input): ValidatedForm<NameInput>) -> im
             code: 0,
             message: "ok".to_string(),
             data: Some(format!("hello,{}!", input.name)),
+        }),
+    )
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct Payload {
+    #[validate(length(min = 1, message = "can not be empty"))]
+    foo: String,
+}
+
+pub async fn json_or_form(JsonOrForm(payload): JsonOrForm<Payload>) -> impl IntoResponse {
+    println!("{:?}", payload);
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(format!("hello,{}!", &payload.foo)),
         }),
     )
 }

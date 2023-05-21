@@ -148,6 +148,83 @@ pub async fn accept_form(
 
 # validate middleware for handlers
 handlers/validate_form.rs
+```rust
+use async_trait::async_trait;
+use axum::extract::{rejection::FormRejection, Form, FromRequest};
+use axum::http::{Request, StatusCode};
+use axum::response::{IntoResponse, Response};
+use axum::Json;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
+use validator::Validate;
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct NameInput {
+    #[validate(length(min = 1, message = "can not be empty"))]
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ValidatedForm<T>(pub T);
+
+/// impl FromRequest trait
+/// these bounds are required by `async_trait`
+#[async_trait]
+impl<S, B, T> FromRequest<S, B> for ValidatedForm<T>
+where
+    B: Send + 'static,
+    S: Send + Sync,
+    T: DeserializeOwned + Validate,
+    Form<T>: FromRequest<S, B, Rejection = FormRejection>,
+{
+    type Rejection = ServerError;
+    async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
+        let Form(value) = Form::<T>::from_request(req, state).await?;
+        value.validate()?;
+        Ok(ValidatedForm(value))
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum ServerError {
+    #[error(transparent)]
+    ValidationError(#[from] validator::ValidationErrors),
+
+    #[error(transparent)]
+    AxumFormRejection(#[from] FormRejection),
+}
+
+/// convert the error to response
+impl IntoResponse for ServerError {
+    fn into_response(self) -> Response {
+        match self {
+            ServerError::ValidationError(err) => {
+                // let message = format!("input validation error: [{}]", self).replace('\n', ", ");
+                let msg = format!("input validation error: [{}]", err).replace('\n', ", ");
+                (
+                    StatusCode::OK,
+                    Json(super::Reply {
+                        code: 1001,
+                        message: msg,
+                        data: Some(super::EmptyObject {}),
+                    }),
+                )
+            }
+            ServerError::AxumFormRejection(_) => (
+                StatusCode::BAD_REQUEST,
+                Json(super::Reply {
+                    code: 500,
+                    message: format!("param error:{}", self.to_string()),
+                    data: Some(super::EmptyObject {}),
+                }),
+            ),
+        }
+        .into_response()
+    }
+}
+
+```
 
 ```shell
 curl --location --request GET 'http://localhost:1338/validate?name='
@@ -184,6 +261,144 @@ response:
   "code": 0,
   "message": "ok",
   "data": "hello,daheige!"
+}
+```
+
+# json or form handler
+handlers/json_or_form.rs
+```rust
+use axum::{
+    async_trait,
+    extract::{rejection::FormRejection, rejection::JsonRejection, FromRequest},
+    http::request::Request,
+    http::{header::CONTENT_TYPE, StatusCode},
+    response::{IntoResponse, Response},
+    Form, Json, RequestExt,
+};
+use serde::de::DeserializeOwned;
+use validator::Validate;
+
+// json or form handler
+pub struct JsonOrForm<T>(pub T);
+
+#[async_trait]
+impl<S, B, T> FromRequest<S, B> for JsonOrForm<T>
+where
+    B: Send + 'static,
+    S: Send + Sync,
+    T: DeserializeOwned + Validate + 'static,
+    Json<T>: FromRequest<S, B, Rejection = JsonRejection>,
+    Form<T>: FromRequest<S, B, Rejection = FormRejection>,
+{
+    type Rejection = Response;
+
+    async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
+        let content_type_header = req.headers().get(CONTENT_TYPE);
+        let content_type = content_type_header
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or("");
+
+        if content_type.starts_with("application/json") {
+            let Json(payload) = req
+                .extract_with_state(state)
+                .await
+                .map_err(IntoResponse::into_response)?;
+            let res = payload.validate();
+            if let Err(err) = res {
+                let msg = format!("input validation error: [{}]", err).replace('\n', ", ");
+                return Err((
+                    StatusCode::OK,
+                    Json(super::Reply {
+                        code: 1001,
+                        message: msg,
+                        data: Some(super::EmptyObject {}),
+                    }),
+                )
+                    .into_response());
+            }
+
+            return Ok(Self(payload));
+        }
+
+        if content_type.starts_with("application/x-www-form-urlencoded") {
+            let Form(payload) = req
+                .extract_with_state(state)
+                .await
+                .map_err(IntoResponse::into_response)?;
+            let res = payload.validate();
+            if let Err(err) = res {
+                let msg = format!("input validation error: [{}]", err).replace('\n', ", ");
+                return Err((
+                    StatusCode::OK,
+                    Json(super::Reply {
+                        code: 1001,
+                        message: msg,
+                        data: Some(super::EmptyObject {}),
+                    }),
+                )
+                    .into_response());
+            }
+
+            return Ok(Self(payload));
+        }
+
+        Err((
+            StatusCode::OK,
+            Json(super::Reply {
+                code: 500,
+                message: format!("content-type:{} error", content_type),
+                data: Some(super::EmptyObject {}),
+            }),
+        )
+            .into_response())
+    }
+}
+```
+
+json request:
+```shell
+curl --location --request POST 'http://localhost:1338/json_or_form' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"foo":"abc"
+}'
+```
+response:
+```json
+{
+    "code": 0,
+    "message": "ok",
+    "data": "hello,abc!"
+}
+```
+
+form request:
+```shell
+curl --location --request POST 'http://localhost:1338/json_or_form' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'foo=abc'
+```
+response:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": "hello,abc!"
+}
+```
+
+invalid request
+```shell
+curl --location --request POST 'http://localhost:1338/json_or_form' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'foo='
+```
+response:
+```json
+{
+    "code": 1001,
+    "message": "input validation error: [foo: can not be empty]",
+    "data": {}
 }
 ```
 
