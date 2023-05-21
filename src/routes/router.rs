@@ -34,7 +34,9 @@ pub fn api_router() -> Router {
         .layer(middleware::from_fn(ware::no_cache_header));
 
     // handler not found
-    app = app.fallback(not_found_handler);
+    app = app
+        .fallback(not_found_handler)
+        .layer(middleware::from_fn(ware::access_log));
     app
 }
 
