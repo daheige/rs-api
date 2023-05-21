@@ -30,7 +30,8 @@ pub fn api_router() -> Router {
         )
         .route("/all-query", get(handlers::index::all_query))
         .route("/validate", get(handlers::index::validate_name))
-        .layer(middleware::from_fn(ware::access_log));
+        .layer(middleware::from_fn(ware::access_log))
+        .layer(middleware::from_fn(ware::no_cache_header));
 
     // handler not found
     app = app.fallback(not_found_handler);
