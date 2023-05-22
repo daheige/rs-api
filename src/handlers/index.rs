@@ -4,6 +4,7 @@ use super::validate_form::ValidatedForm;
 use crate::entity::user;
 use crate::services::user as userService;
 use axum::http::{header, HeaderMap};
+use axum::response::Response;
 use axum::{
     extract::{Path, Query},
     http::StatusCode,
@@ -252,4 +253,23 @@ pub async fn json_or_form(JsonOrForm(payload): JsonOrForm<Payload>) -> impl Into
             data: Some(format!("hello,{}!", &payload.foo)),
         }),
     )
+}
+
+/// Returning different response types
+/// http://localhost:1338/api/either/1
+/// http://localhost:1338/api/either/2
+pub async fn either_handler(Path(id): Path<i64>) -> Response {
+    if id == 1 {
+        return format!("user id:{}", id).into_response();
+    }
+
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(format!("hello,id:{}", id)),
+        }),
+    )
+        .into_response()
 }

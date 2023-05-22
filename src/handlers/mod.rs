@@ -5,10 +5,10 @@ pub mod json_or_form;
 pub mod validate_form;
 
 #[derive(Deserialize, Serialize, Debug)]
-struct Reply<T> {
-    code: i32,
-    message: String,
-    data: Option<T>,
+pub struct Reply<T> {
+    pub code: i32,
+    pub message: String,
+    pub data: Option<T>,
 }
 
 // empty object,like {}
