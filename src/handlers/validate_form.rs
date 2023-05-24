@@ -4,15 +4,8 @@ use axum::http::{Request, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use validator::Validate;
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct NameInput {
-    #[validate(length(min = 1, message = "can not be empty"))]
-    pub name: String,
-}
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedForm<T>(pub T);
