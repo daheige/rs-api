@@ -1,8 +1,6 @@
+use crate::utils::get_header;
 use axum::{
-    http::{
-        header::{self, AsHeaderName},
-        HeaderMap, HeaderValue, Request,
-    },
+    http::{header, HeaderValue, Request},
     middleware::Next,
     response::IntoResponse,
 };
@@ -67,13 +65,4 @@ where
     );
 
     response
-}
-
-fn get_header<K: AsHeaderName>(headers: &HeaderMap, key: K) -> String {
-    let s = headers
-        .get(key)
-        .and_then(|v| v.to_str().ok())
-        .map(|v| v.to_string())
-        .unwrap_or("".to_string());
-    s
 }

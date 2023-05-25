@@ -2,6 +2,7 @@ use super::json_or_form::JsonOrForm;
 use super::validate_form::ValidatedForm;
 use crate::entity::user;
 use crate::services::user as userService;
+use crate::utils::get_header;
 use axum::http::{header, HeaderMap};
 use axum::response::Response;
 use axum::{
@@ -217,7 +218,11 @@ pub async fn query_user_opt_done(Query(args): Query<user::UserOpt>) -> String {
 
 /// get all query params
 /// eg: /all-query?id=1&username=daheige
-pub async fn all_query(Query(args): Query<HashMap<String, String>>) -> String {
+pub async fn all_query(headers: HeaderMap, Query(args): Query<HashMap<String, String>>) -> String {
+    // get ua
+    let ua = get_header(&headers, "user-agent");
+    println!("ua:{}", ua);
+
     format!("all query:{:?}", args)
 }
 
