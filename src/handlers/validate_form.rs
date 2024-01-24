@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use axum::extract::{rejection::FormRejection, Form, FromRequest};
-use axum::http::{Request, StatusCode};
+use axum::extract::{rejection::FormRejection, Form, FromRequest, Request};
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde::de::DeserializeOwned;
@@ -13,15 +13,14 @@ pub struct ValidatedForm<T>(pub T);
 /// impl FromRequest trait
 /// these bounds are required by `async_trait`
 #[async_trait]
-impl<S, B, T> FromRequest<S, B> for ValidatedForm<T>
+impl<S, T> FromRequest<S> for ValidatedForm<T>
 where
-    B: Send + 'static,
     S: Send + Sync,
     T: DeserializeOwned + Validate,
-    Form<T>: FromRequest<S, B, Rejection = FormRejection>,
+    Form<T>: FromRequest<S, Rejection = FormRejection>,
 {
     type Rejection = ServerError;
-    async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let Form(value) = Form::<T>::from_request(req, state).await?;
         value.validate()?;
         Ok(ValidatedForm(value))

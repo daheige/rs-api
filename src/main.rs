@@ -1,6 +1,7 @@
 use std::net::SocketAddr;
 use std::process;
 use std::time::Duration;
+use tokio::net::TcpListener;
 use tokio::signal;
 
 // define module
@@ -26,9 +27,11 @@ async fn main() {
     // create axum router
     let router = routes::router::api_router();
 
-    // run app
-    axum::Server::bind(&address)
-        .serve(router.into_make_service())
+    // Create a `TcpListener` using tokio.
+    let listener = TcpListener::bind(address).await.unwrap();
+
+    // Run the server with graceful shutdown
+    axum::serve(listener, router)
         .with_graceful_shutdown(graceful_shutdown())
         .await
         .unwrap();
@@ -39,7 +42,7 @@ async fn graceful_shutdown() {
     let ctrl_c = async {
         signal::ctrl_c()
             .await
-            .expect("failed to install ctrl+c handler");
+            .expect("failed to install Ctrl+C handler");
     };
 
     #[cfg(unix)]
@@ -52,7 +55,6 @@ async fn graceful_shutdown() {
 
     #[cfg(not(unix))]
     let terminate = std::future::pending::<()>();
-
     tokio::select! {
         _ = ctrl_c =>{
             println!("received ctrl_c signal,server will exist...");

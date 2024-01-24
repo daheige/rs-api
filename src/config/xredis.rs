@@ -4,7 +4,7 @@ use once_cell::sync::Lazy;
 // redis
 use r2d2::Pool;
 use redis::Client;
-use rs_infras::redis::RedisConf;
+use rs_infras::xredis::RedisConf;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 

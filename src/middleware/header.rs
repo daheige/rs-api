@@ -1,15 +1,7 @@
-use axum::{
-    http::{HeaderValue, Request},
-    middleware::Next,
-    response::IntoResponse,
-};
+use axum::{extract::Request, http::HeaderValue, middleware::Next, response::IntoResponse};
 use std::collections::HashMap;
-use std::fmt::Debug;
 
-pub async fn no_cache_header<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse
-where
-    B: Debug,
-{
+pub async fn no_cache_header(req: Request, next: Next) -> impl IntoResponse {
     // handler request
     let mut response = next.run(req).await;
 
