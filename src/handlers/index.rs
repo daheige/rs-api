@@ -1,8 +1,10 @@
 use super::json_or_form::JsonOrForm;
 use super::validate_form::ValidatedForm;
+use crate::config::app::AppState;
 use crate::entity::user;
+use crate::infras::utils::get_header;
 use crate::services::user as userService;
-use crate::utils::get_header;
+use axum::extract::State;
 use axum::http::{header, HeaderMap};
 use axum::response::Response;
 use axum::{
@@ -13,7 +15,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
+use std::sync::Arc;
 // validate error
 use validator::Validate;
 
@@ -24,6 +26,7 @@ pub async fn root() -> &'static str {
 
 // create user
 pub async fn create_user(
+    State(state): State<Arc<AppState>>,
     // this argument tells axum to parse the request body
     // as JSON into a `CreateUser` type
     Json(payload): Json<user::CreateUser>,
@@ -35,7 +38,7 @@ pub async fn create_user(
     };
 
     // set user cache
-    let res = userService::set_user(&user);
+    let res = userService::set_user(state.redis_pool.clone(), &user);
     if res.is_err() {
         return (
             StatusCode::OK,
@@ -199,9 +202,8 @@ pub async fn query_user(Query(args): Query<user::User>) -> String {
 
 /// bind params to option struct
 /// eg:query_user_opt?id=1&username=daheige
-pub async fn query_user_opt(args: Option<Query<user::User>>) -> String {
-    if let Some(args) = args {
-        let user = args.0;
+pub async fn query_user_opt(user: Query<user::User>) -> String {
+    if user.id.gt(&0) && user.username.ne("") {
         return format!("user id:{},username:{}", user.id, user.username);
     }
 

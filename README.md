@@ -1,33 +1,36 @@
 # rs-api
-rust web(api)/job/rpc application
+rust web(api) application framework
 
 # axum version
-current axum >= 0.7.4+
+current axum >= 0.8.0
 
-if you are using axum below version 0.7 please use rs-api v1 branch code
+If you are using a version of axum less than version 0.7, use the v1 branch. 
+Use the v0.7.x branch if the version is greater than and less than 0.8.
 
 # related crates
 - axum: https://crates.io/crates/axum https://github.com/tokio-rs/axum
 - tokio: https://crates.io/crates/tokio https://github.com/tokio-rs/tokio
 - serde: https://crates.io/crates/serde https://github.com/serde-rs/serde
 - redis: https://crates.io/crates/redis https://github.com/redis-rs/redis-rs
-- rs-infras: https://github.com/rs-god/rs-infras
+- sqlx: https://crates.io/crates/sqlx
 - rust cron job: https://github.com/rs-god/rcron
 - rust grpc project: https://github.com/daheige/rs-rpc
 
 # layout
 ```
 .
-├── config Configuration file reading and initialization
-├── handlers Function handler for complex routing rules
-│ └── mod.rs
-├── main.rs 
-├── middleware The main middleware is rpc/api middleware
-│ └── mod.rs
-├── routes Routing rule
-│ └── mod.rs
-└── services Business logic layer
-└── mod.rs
+├── app.yaml
+├── rustfmt.toml
+├── src
+│  ├── config 配置读取和初始化
+│  ├── entity 实体对象定义
+│  ├── handlers 处理器函数
+│  ├── infras 基础设施层
+│  ├── job.rs job任务
+│  ├── main.rs web入口文件
+│  ├── middleware web中间件
+│  ├── routes 路由配置
+│  └── services 服务层（业务逻辑编排）
 ```
 
 # run
@@ -157,6 +160,7 @@ handlers/validate_form.rs
 ```shell
 curl --location --request GET 'http://localhost:1338/validate?name='
 ```
+
 response:
 ```json
 {

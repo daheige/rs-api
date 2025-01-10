@@ -1,5 +1,7 @@
+use crate::config::{mysql, xredis};
 use std::net::SocketAddr;
 use std::process;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::signal;
@@ -8,10 +10,10 @@ use tokio::signal;
 mod config;
 mod entity;
 mod handlers;
+mod infras;
 mod middleware;
 mod routes;
 mod services;
-mod utils;
 
 #[tokio::main]
 async fn main() {
@@ -24,8 +26,20 @@ async fn main() {
         .unwrap();
     println!("app run on:{}", address.to_string());
 
+    // create mysql pool
+    let mysql_pool = mysql::pool(&config::APP_CONFIG.mysql_conf)
+        .await
+        .expect("mysql pool init failed");
+
+    // create redis pool
+    let redis_pool = xredis::pool(&config::APP_CONFIG.redis_conf);
+    let app_state = Arc::new(config::app::AppState {
+        redis_pool: redis_pool,
+        mysql_pool: mysql_pool,
+    });
+
     // create axum router
-    let router = routes::router::api_router();
+    let router = routes::router::api_router(app_state);
 
     // Create a `TcpListener` using tokio.
     let listener = TcpListener::bind(address).await.unwrap();

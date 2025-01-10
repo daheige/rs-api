@@ -1,10 +1,7 @@
-use crate::config::APP_CONFIG;
-use once_cell::sync::Lazy;
-
 // redis
+use crate::infras::RedisService;
 use r2d2::Pool;
 use redis::Client;
-use rs_infras::xredis::RedisConf;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -20,15 +17,14 @@ pub struct RedisConfig {
 }
 
 // redis pool init
-pub static REDIS_POOL: Lazy<Pool<Client>> = Lazy::new(|| {
-    let redis_conf = &APP_CONFIG.redis_conf;
-    let pool = RedisConf::builder()
+pub fn pool(redis_conf: &RedisConfig) -> Pool<Client> {
+    let pool = RedisService::builder()
         .with_dsn(redis_conf.dsn.as_str())
         .with_max_size(redis_conf.max_size)
         .with_max_lifetime(Duration::from_secs(redis_conf.max_lifetime))
         .with_idle_timeout(Duration::from_secs(redis_conf.idle_timeout))
         .with_min_idle(redis_conf.min_idle)
         .with_connect_timeout(Duration::from_secs(redis_conf.connection_timeout))
-        .init_pool();
+        .pool();
     pool
-});
+}

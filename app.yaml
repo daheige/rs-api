@@ -12,3 +12,11 @@ redis_conf:
     max_lifetime: 1800 # 单位s
     idle_timeout: 300 # 单位s
     connection_timeout: 10 #单位s
+
+mysql_conf:
+    dsn: "mysql://root:root123456@127.0.0.1/test" # dsn连接句柄信息
+    max_connections: 100 # 最大连接数
+    min_connections: 10  # 最小连接数
+    max_lifetime: 1800  # 连接池默认生命周期，单位s
+    idle_timeout: 300   # 空闲连接生命周期超时，单位s
+    connect_timeout: 10 # 连接超时时间，单位s

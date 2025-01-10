@@ -1,5 +1,6 @@
+pub mod app;
 mod config;
-mod xredis;
+pub mod mysql;
+pub mod xredis;
 
 pub use config::APP_CONFIG;
-pub use xredis::REDIS_POOL;

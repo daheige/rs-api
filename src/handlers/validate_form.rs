@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use axum::extract::{rejection::FormRejection, Form, FromRequest, Request};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -11,8 +10,6 @@ use validator::Validate;
 pub struct ValidatedForm<T>(pub T);
 
 /// impl FromRequest trait
-/// these bounds are required by `async_trait`
-#[async_trait]
 impl<S, T> FromRequest<S> for ValidatedForm<T>
 where
     S: Send + Sync,

@@ -1,5 +1,5 @@
-use crate::handlers;
 use crate::middleware as ware;
+use crate::{config::app::AppState, handlers};
 use axum::{
     http::StatusCode,
     middleware,
@@ -7,9 +7,10 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use std::sync::Arc;
 
 // create api router
-pub fn api_router() -> Router {
+pub fn api_router(state: Arc<AppState>) -> Router {
     let router = Router::new()
         .route("/", get(handlers::index::root))
         .route("/empty-array", get(handlers::index::empty_array))
@@ -20,8 +21,8 @@ pub fn api_router() -> Router {
         // .route("/set-user-cookie", post(handlers::index::set_user_cookie))
         .route("/get-user-cookie", get(handlers::index::get_user_cookie))
         .route("/form", post(handlers::index::accept_form))
-        .route("/user/:id", get(handlers::index::user_info))
-        .route("/repo/:repo/:name", get(handlers::index::repo_info))
+        .route("/user/{id}", get(handlers::index::user_info))
+        .route("/repo/{repo}/{name}", get(handlers::index::repo_info))
         .route("/query_user", get(handlers::index::query_user))
         .route("/query_user_opt", get(handlers::index::query_user_opt))
         .route(
@@ -30,7 +31,8 @@ pub fn api_router() -> Router {
         )
         .route("/all-query", get(handlers::index::all_query))
         .route("/validate", get(handlers::index::validate_name))
-        .route("/json_or_form", post(handlers::index::json_or_form));
+        .route("/json_or_form", post(handlers::index::json_or_form))
+        .with_state(state);
 
     // router group like /api/user/xxx this way
     // /api/foo/xxx
@@ -39,7 +41,7 @@ pub fn api_router() -> Router {
         .nest("/user", user_router())
         .nest("/foo", foo_router())
         .route("/hello", get(handlers::index::root))
-        .route("/either/:id", get(handlers::index::either_handler))
+        .route("/either/{id}", get(handlers::index::either_handler))
         .fallback(api_not_found); // set api group and not found handler for api/xxx
 
     let router = Router::new()
@@ -56,7 +58,7 @@ pub fn api_router() -> Router {
 /// /api/user/1
 fn user_router() -> Router {
     let router = Router::new()
-        .route("/:id", get(handlers::index::user_info))
+        .route("/{id}", get(handlers::index::user_info))
         .route("/query", get(handlers::index::query_user));
     router
 }

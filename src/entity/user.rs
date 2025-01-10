@@ -7,7 +7,8 @@ pub struct CreateUser {
 }
 
 // the output to our `create_user` handler
-#[derive(Serialize, Deserialize, Debug)]
+// 使用sqlx::FromRow标记属性用于行记录读取
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 pub struct User {
     pub id: u64,
     pub username: String,
