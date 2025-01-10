@@ -1,8 +1,9 @@
 # rs-api
 rust web(api) application framework
 
-# axum version
+# axum version required
 current axum >= 0.8.0
+rust version >= 1.75
 
 If you are using a version of axum less than version 0.7, use the v1 branch. 
 Use the v0.7.x branch if the version is greater than and less than 0.8.
