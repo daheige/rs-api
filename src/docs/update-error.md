@@ -13,3 +13,6 @@ error[E0432]: unresolved import `axum::async_trait`
 ```
 
 去掉#[async_trait]即可，在axum 0.8后不再需要这个derive注解
+
+# 升级指导
+https://mp.weixin.qq.com/s/n2zFly1TRO6lkPtrU-Fe1A
