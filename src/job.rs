@@ -26,6 +26,7 @@ async fn main() {
         redis_pool,
         mysql_pool,
     };
+
     // get user
     let result = userService::query_user(app_state.mysql_pool.clone(), 1).await;
     println!("result:{:?}", result);
@@ -38,9 +39,9 @@ async fn main() {
         username: "daheige".to_string(),
     };
 
-    let res = userService::set_user(app_state.redis_pool.clone(), &user);
+    let res = userService::set_user_cache(app_state.redis_pool.clone(), &user).await;
     if res.is_err() {
-        println!("set user error:{}", res.err().unwrap().to_string());
+        println!("set user error:{}", res.err().unwrap());
     } else {
         println!("set success");
     }

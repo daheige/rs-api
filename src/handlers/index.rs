@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 // validate error
 use validator::Validate;
+use crate::entity::user::User;
 
 // basic handler that responds with a static string
 pub async fn root() -> &'static str {
@@ -30,25 +31,41 @@ pub async fn create_user(
     // this argument tells axum to parse the request body
     // as JSON into a `CreateUser` type
     Json(payload): Json<user::CreateUser>,
-) -> impl IntoResponse {
-    // insert your application logic here
-    let user = user::User {
-        id: 1337,
-        username: payload.username,
-    };
-
-    // set user cache
-    let res = userService::set_user(state.redis_pool.clone(), &user);
-    if res.is_err() {
+) -> Response {
+    // query current user
+    let user = userService::get_user(state.mysql_pool.clone(),&payload.username).await;
+    if user.is_ok(){
         return (
             StatusCode::OK,
             Json(super::Reply {
                 code: 500,
-                message: format!("{}", res.err().unwrap()),
-                data: None,
+                message: "user already exists".to_string(),
+                data: Some(super::EmptyObject {}),
             }),
-        );
+        )
+            .into_response();
     }
+
+    // create user
+    let res = userService::create_user(state.mysql_pool.clone(),&payload.username).await;
+    if res.is_err(){
+        println!("create user error:{}",res.err().unwrap());
+        return (
+            StatusCode::OK,
+            Json(super::Reply {
+                code: 500,
+                message: "failed to create user".to_string(),
+                data: Some(super::EmptyObject {}),
+            }),
+        )
+            .into_response();
+    }
+
+    let id = res.unwrap();
+    let user = User{
+        id:  id as u64,
+        username: payload.username,
+    };
 
     // this will be converted into a JSON response
     // with a status code of `201 Created`
@@ -60,6 +77,7 @@ pub async fn create_user(
             data: Some(user),
         }),
     )
+        .into_response()
 }
 
 pub async fn empty_array() -> impl IntoResponse {
@@ -185,8 +203,53 @@ pub async fn get_user_cookie(headers: HeaderMap) -> impl IntoResponse {
 /// get path params
 /// /user/:id
 /// eg: /user/123
-pub async fn user_info(Path(id): Path<i64>) -> String {
-    format!("user id:{}", id)
+pub async fn user_info(Path(id): Path<i64>,State(state): State<Arc<AppState>>) -> Response {
+    let res = userService::get_user_cache(state.redis_pool.clone(),id).await;
+    if res.is_ok() {
+       let user = res.unwrap();
+        println!("user cache hit");
+        println!("user:{:?}",user);
+        return (
+            StatusCode::OK,
+            Json(super::Reply {
+                code: 0,
+                message: "ok".to_string(),
+                data: Some(user),
+            }),
+        )
+            .into_response()
+    }
+
+    println!("user cache not hit");
+    // query current user
+    let res = userService::get_user_by_id(state.mysql_pool.clone(),id).await;
+    if res.is_err(){
+        // 用户不存在
+        return (
+            StatusCode::OK,
+            Json(super::Reply {
+                code: 500,
+                message: "user not found".to_string(),
+                data: Some(super::EmptyObject {}),
+            }),
+        )
+            .into_response()
+    }
+    
+    let user = res.unwrap();
+    println!("get user:{:?}",user);
+
+    // 设置缓存
+    let _ = userService::set_user_cache(state.redis_pool.clone(),&user).await;
+    (
+        StatusCode::OK,
+        Json(super::Reply {
+            code: 0,
+            message: "ok".to_string(),
+            data: Some(user),
+        }),
+    )
+        .into_response()
 }
 
 /// /repo/:repo/:id

@@ -83,6 +83,11 @@ response
 }
 ```
 
+GET http://localhost:1338/api/user/1
+```shell
+curl 'http://localhost:1338/api/user/1'
+```
+
 GET http://localhost:1338/empty-array
 ```shell
 curl --location --request GET 'localhost:1338/empty-array'

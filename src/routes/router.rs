@@ -11,6 +11,7 @@ use std::sync::Arc;
 
 // create api router
 pub fn api_router(state: Arc<AppState>) -> Router {
+    let state1 = state.clone();
     let router = Router::new()
         .route("/", get(handlers::index::root))
         .route("/empty-array", get(handlers::index::empty_array))
@@ -32,13 +33,13 @@ pub fn api_router(state: Arc<AppState>) -> Router {
         .route("/all-query", get(handlers::index::all_query))
         .route("/validate", get(handlers::index::validate_name))
         .route("/json_or_form", post(handlers::index::json_or_form))
-        .with_state(state);
+        .with_state(state1);
 
     // router group like /api/user/xxx this way
     // /api/foo/xxx
     // /api/hello
     let api_routes = Router::new()
-        .nest("/user", user_router())
+        .nest("/user", user_router(state))
         .nest("/foo", foo_router())
         .route("/hello", get(handlers::index::root))
         .route("/either/{id}", get(handlers::index::either_handler))
@@ -56,10 +57,11 @@ pub fn api_router(state: Arc<AppState>) -> Router {
 /// router group like these way
 /// /api/user/query?id=1&username=daheige
 /// /api/user/1
-fn user_router() -> Router {
+fn user_router(state: Arc<AppState>) -> Router {
     let router = Router::new()
         .route("/{id}", get(handlers::index::user_info))
-        .route("/query", get(handlers::index::query_user));
+        .route("/query", get(handlers::index::query_user))
+        .with_state(state);
     router
 }
 
