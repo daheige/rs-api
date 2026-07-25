@@ -2,7 +2,7 @@ use crate::config::mysql;
 use crate::config::xredis;
 use crate::entity::user;
 use crate::services::user as userService;
-use std::process;
+use std::{env, process};
 
 mod config;
 mod entity;
@@ -11,6 +11,14 @@ mod services;
 
 #[tokio::main]
 async fn main() {
+    // 初始化日志 logger，日志级别通过环境变量 RUST_LOG 控制
+    // 优先级：error > warn > info > debug > trace
+    if !config::APP_CONFIG.log_level.is_empty() {
+        unsafe {
+            env::set_var("RUST_LOG", "info");
+        }
+    }
+
     println!("job exec...");
     println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
     println!("current process pid:{}", process::id());

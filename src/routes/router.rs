@@ -1,11 +1,11 @@
 use crate::middleware as ware;
 use crate::{config::app::AppState, handlers};
 use axum::{
+    Json, Router,
     http::StatusCode,
     middleware,
     response::IntoResponse,
     routing::{get, post},
-    Json, Router,
 };
 use std::sync::Arc;
 

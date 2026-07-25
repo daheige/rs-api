@@ -1,0 +1,18 @@
+# nightly only rustfmt config
+# usage: rustfmt --config-path rustfmt-nightly.toml
+# or with cargo: cargo +nightly fmt -- --config-path rustfmt-nightly.toml
+
+comment_width = 80
+max_width = 100
+edition = "2024"
+format_code_in_doc_comments = true
+format_strings = true
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+normalize_comments = true
+normalize_doc_attributes = true
+wrap_comments = true
+blank_lines_lower_bound = 0
+blank_lines_upper_bound = 1
+brace_style = "SameLineWhere"
+merge_derives = true

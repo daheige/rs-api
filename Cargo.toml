@@ -1,7 +1,7 @@
 [package]
 name = "rs-api"
-version = "0.1.1"
-edition = "2021"
+version = "0.1.2"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,7 +15,6 @@ tokio = { version = "1.53.1", features = ["full"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 serde_yaml = "0.9.33"
-once_cell = "1.21.4"
 
 # redis操作库
 redis = { version = "1.4.1", features = ["r2d2", "tokio-comp", "cluster", "cluster-async", "json"] }
@@ -37,3 +36,11 @@ thiserror = "2.0.19"
 http-body-util = "0.1.4"
 
 anyhow = "1.0.104"
+
+# autometrics-rs 用于自动prometheus metrics服务可观测性
+autometrics = { version = "3.0.0", features = ["prometheus-exporter"] }
+monitor = { git = "https://github.com/rs-god/hera", tag = "v1.2.2" }
+
+# logger
+log = "0.4.33"
+logger = { git = "https://github.com/rs-god/hera", tag = "v1.2.2" }

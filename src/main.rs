@@ -1,8 +1,11 @@
 use crate::config::{mysql, xredis};
+use log::info;
+use logger::Logger;
+use monitor::metrics::prometheus_init;
 use std::net::SocketAddr;
-use std::process;
 use std::sync::Arc;
 use std::time::Duration;
+use std::{env, process};
 use tokio::net::TcpListener;
 use tokio::signal;
 
@@ -17,14 +20,24 @@ mod services;
 
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
-    println!("app_debug:{:?}", config::APP_CONFIG.app_debug);
-    println!("current process pid:{}", process::id());
+    // 初始化日志 logger，日志级别通过环境变量 RUST_LOG 控制
+    // 优先级：error > warn > info > debug > trace
+    if !config::APP_CONFIG.log_level.is_empty() {
+        unsafe {
+            env::set_var("RUST_LOG", "info");
+        }
+    }
+
+    // JSON 格式，携带 caller 行号
+    Logger::new().with_caller_line().with_json().init();
+
+    info!("app_debug:{:?}", config::APP_CONFIG.app_debug);
+    info!("current process pid:{}", process::id());
 
     let address: SocketAddr = format!("0.0.0.0:{}", config::APP_CONFIG.app_port)
         .parse()
         .unwrap();
-    println!("app run on:{}", address.to_string());
+    info!("app run on:{}", address.to_string());
 
     // create mysql pool
     let mysql_pool = mysql::pool(&config::APP_CONFIG.mysql_conf)
@@ -34,8 +47,8 @@ async fn main() {
     // create redis pool
     let redis_pool = xredis::pool(&config::APP_CONFIG.redis_conf);
     let app_state = Arc::new(config::app::AppState {
-        redis_pool: redis_pool,
-        mysql_pool: mysql_pool,
+        redis_pool,
+        mysql_pool,
     });
 
     // create axum router
@@ -44,11 +57,22 @@ async fn main() {
     // Create a `TcpListener` using tokio.
     let listener = TcpListener::bind(address).await.unwrap();
 
-    // Run the server with graceful shutdown
-    axum::serve(listener, router)
-        .with_graceful_shutdown(graceful_shutdown())
-        .await
-        .unwrap();
+    // http handler
+    let http_handler = tokio::spawn(async move {
+        // Run the server with graceful shutdown
+        axum::serve(listener, router)
+            .with_graceful_shutdown(graceful_shutdown())
+            .await
+            .expect("failed to start http service");
+    });
+
+    // metrics
+    let metrics_server = prometheus_init(config::APP_CONFIG.monitor_port);
+    let metrics_handler = tokio::spawn(metrics_server);
+
+    // start http and metrics service
+    let _ = tokio::try_join!(http_handler, metrics_handler)
+        .expect("failed to start http service and metrics service");
 }
 
 // graceful shutdown
@@ -71,14 +95,14 @@ async fn graceful_shutdown() {
     let terminate = std::future::pending::<()>();
     tokio::select! {
         _ = ctrl_c =>{
-            println!("received ctrl_c signal,server will exist...");
+            info!("received ctrl_c signal,server will exist...");
             tokio::time::sleep(Duration::from_secs(config::APP_CONFIG.graceful_wait_time)).await;
         },
         _ = terminate => {
-            println!("received terminate signal,server will exist...");
+             info!("received terminate signal,server will exist...");
             tokio::time::sleep(Duration::from_secs(config::APP_CONFIG.graceful_wait_time)).await;
         },
     }
 
-    println!("signal received,starting graceful shutdown");
+    info!("signal received,starting graceful shutdown");
 }

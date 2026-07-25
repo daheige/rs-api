@@ -22,18 +22,18 @@ pub async fn set_user_cache(redis: Pool<redis::Client>, user: &User) -> anyhow::
     Ok(())
 }
 
-pub async fn get_user_cache(redis: Pool<redis::Client>,id: i64) -> anyhow::Result<User> {
+pub async fn get_user_cache(redis: Pool<redis::Client>, id: i64) -> anyhow::Result<User> {
     let mut conn = redis.get()?;
 
     // set pool timeout session
     // let mut conn = redis.get_timeout(Duration::from_secs(2))?;
     let key = format!("user:{}", id);
-    let res:String = conn.get(key)?;
+    let res: String = conn.get(key)?;
     if res.is_empty() {
         return Err(anyhow::anyhow!("user cache not found"));
     }
 
-    let user : User = serde_json::from_str(&res)?;
+    let user: User = serde_json::from_str(&res)?;
 
     Ok(user)
 }
@@ -68,13 +68,11 @@ pub async fn get_user_by_id(db: sqlx::MySqlPool, id: i64) -> anyhow::Result<User
     Ok(user)
 }
 
-pub async fn create_user(db: sqlx::MySqlPool, username: &str)-> anyhow::Result<i64> {
+pub async fn create_user(db: sqlx::MySqlPool, username: &str) -> anyhow::Result<i64> {
     let sql = "insert into users (username) values (?)";
     let res = sqlx::query(sql).bind(username).execute(&db).await?;
-    if res.last_insert_id() == 0{
-        return Err(anyhow::anyhow!(
-            "failed to create user:{}",username
-        ));
+    if res.last_insert_id() == 0 {
+        return Err(anyhow::anyhow!("failed to create user:{}", username));
     }
 
     Ok(res.last_insert_id() as i64)

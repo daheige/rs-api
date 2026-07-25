@@ -1,8 +1,8 @@
 use crate::config::{mysql, xredis};
 use crate::infras::{Config, ConfigTrait};
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use std::sync::LazyLock as Lazy;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct AppConfig {
@@ -10,8 +10,10 @@ pub struct AppConfig {
     pub mysql_conf: mysql::MysqlConfig,
     pub app_debug: bool,
     pub app_name: String,
-    pub app_port: i32,
+    pub app_port: u16,
+    pub monitor_port: u16,
     pub graceful_wait_time: u64,
+    pub log_level: String,
 }
 
 // config read and init app config

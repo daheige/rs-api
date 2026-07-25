@@ -10,9 +10,12 @@ use axum::{
 // body output
 use http_body_util::BodyExt;
 
+use log::info;
 use std::ops::Sub;
 use std::time::Instant;
 use uuid::Uuid;
+
+const OUTPUT_BODY: bool = false;
 
 pub async fn access_log(
     req: Request,
@@ -21,7 +24,6 @@ pub async fn access_log(
     let method = req.method();
     let uri = req.uri();
     let path = uri.path();
-    let query = uri.query();
     let headers = req.headers();
     let ua = get_header(headers, header::USER_AGENT);
     let mut request_id = get_header(headers, "x-request-id");
@@ -32,17 +34,25 @@ pub async fn access_log(
     let start_time = Instant::now();
 
     // println!("request:{:?}", req);
-    println!(
-        "exec begin,method:{} uri:{} path:{} query:{:?} ua:{} request_id:{}",
-        method, uri, path, query, ua, request_id,
-    );
+    // let query = uri.query();
+    // info!(
+    //     "exec begin,method:{} uri:{} path:{} query:{:?} ua:{} request_id:{}",
+    //     method, uri, path, query, ua, request_id,
+    // );
+    info!(request_id=request_id,method=method.to_string(),uri=uri.to_string(),path=path,ua=ua; "exec begin");
+
+    let request_id = request_id.as_str();
 
     // insert x-request-id into headers
     let (mut parts, body) = req.into_parts();
 
-    let request_id = request_id.as_str();
-    // print request body
-    let bytes = buffer_and_print(request_id, "request", body).await?;
+    // 根据OUTPUT_BODY决定是否输出request body
+    let body = if OUTPUT_BODY {
+        let bytes = buffer_and_print(request_id, "request", body).await?;
+        Body::from(bytes)
+    } else {
+        body
+    };
 
     // parts
     //     .headers
@@ -53,18 +63,20 @@ pub async fn access_log(
         .insert("x-request-id", HeaderValue::from_str(request_id).unwrap());
 
     // change request with new parts and body
-    let req = Request::from_parts(parts, Body::from(bytes));
+    let req = Request::from_parts(parts, body);
 
     // handler request
     let mut response = next.run(req).await;
 
     // exec request end
     let end_time = Instant::now();
-    println!(
-        "exec end,request_id:{},exec_time:{}ms",
-        request_id,
-        end_time.sub(start_time).as_millis(),
-    );
+    // info!(
+    //     "exec end,request_id:{},exec_time:{}ms",
+    //     request_id,
+    //     end_time.sub(start_time).as_millis(),
+    // );
+
+    info!(request_id=request_id,exec_time=end_time.sub(start_time).as_millis();"exec end");
 
     // set x-request-id to headers
     response
@@ -72,12 +84,15 @@ pub async fn access_log(
         .insert("x-request-id", HeaderValue::from_str(request_id).unwrap());
 
     // output response body
-    // 是否要输出response body根据实际情况决定
-    let (parts, body) = response.into_parts();
-    let bytes = buffer_and_print(request_id, "response", body).await?;
-    let response = Response::from_parts(parts, Body::from(bytes));
-
-    Ok(response)
+    // 是否要输出response body根据OUTPUT_BODY决定
+    if OUTPUT_BODY {
+        let (parts, body) = response.into_parts();
+        let bytes = buffer_and_print(request_id, "response", body).await?;
+        let response = Response::from_parts(parts, Body::from(bytes));
+        Ok(response)
+    } else {
+        Ok(response)
+    }
 }
 
 async fn buffer_and_print<B>(
