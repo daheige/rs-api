@@ -17,7 +17,7 @@ serde_json = "1.0.151"
 serde_yaml = "0.9.33"
 
 # redis操作库
-redis = { version = "1.4.1", features = ["r2d2", "tokio-comp", "cluster", "cluster-async", "json"] }
+redis = { version = "1.7.0", features = ["r2d2", "tokio-comp", "cluster", "cluster-async", "json"] }
 # r2d2用于redis连接池管理
 r2d2 = "0.8.10"
 
@@ -25,22 +25,22 @@ r2d2 = "0.8.10"
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "tls-native-tls", "mysql", "chrono", "time"] }
 
 #uuid
-uuid = { version = "1.24.0", features = ["serde", "v4"] }
+uuid = { version = "1.26.1", features = ["serde", "v4"] }
 
 #validator
-validator = { version = "0.20.0", features = ["derive"] }
-async-trait = "0.1.91"
-thiserror = "2.0.19"
+validator = { version = "0.21.0", features = ["derive"] }
+async-trait = "0.1.92"
+thiserror = "2.0.20"
 
 # body util
-http-body-util = "0.1.4"
+http-body-util = "0.1.5"
 
 anyhow = "1.0.104"
 
 # autometrics-rs 用于自动prometheus metrics服务可观测性
 autometrics = { version = "3.0.0", features = ["prometheus-exporter"] }
-monitor = { git = "https://github.com/rs-god/hera", tag = "v1.2.2" }
+monitor = { git = "https://github.com/rs-god/hera", tag = "v1.2.6" }
 
 # logger
-log = "0.4.33"
-logger = { git = "https://github.com/rs-god/hera", tag = "v1.2.2" }
+log = "0.4.34"
+logger = { git = "https://github.com/rs-god/hera", tag = "v1.2.6" }
