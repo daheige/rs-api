@@ -1,6 +1,6 @@
 [package]
 name = "rs-api"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,13 +11,13 @@ path = "src/job.rs"
 
 [dependencies]
 axum = "0.8.9"
-tokio = { version = "1.53.1", features = ["full"] }
+tokio = { version = "1.54.1", features = ["full"] }
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
+serde_json = "1.0.154"
 serde_yaml = "0.9.33"
 
 # redis操作库
-redis = { version = "1.7.0", features = ["r2d2", "tokio-comp", "cluster", "cluster-async", "json"] }
+redis = { version = "1.8.0", features = ["r2d2", "tokio-comp", "cluster", "cluster-async", "json"] }
 # r2d2用于redis连接池管理
 r2d2 = "0.8.10"
 
@@ -25,13 +25,13 @@ r2d2 = "0.8.10"
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "tls-native-tls", "mysql", "chrono", "time"] }
 
 #uuid
-uuid = { version = "1.26.1", features = ["serde", "v4"] }
+uuid = { version = "1.29.0", features = ["serde", "v4"] }
 
 #async-trait = "0.1.92"
 
 #validator
 validator = { version = "0.21.0", features = ["derive"] }
-thiserror = "2.0.20"
+thiserror = "2.0.21"
 
 # body util
 http-body-util = "0.1.5"
@@ -40,8 +40,8 @@ anyhow = "1.0.104"
 
 # autometrics-rs 用于自动prometheus metrics服务可观测性
 autometrics = { version = "3.0.0", features = ["prometheus-exporter"] }
-monitor = { git = "https://github.com/rs-god/hera", tag = "v1.2.6" }
+monitor = { git = "https://github.com/rs-god/hera", tag = "v1.3.0" }
 
 # logger
 log = "0.4.34"
-logger = { git = "https://github.com/rs-god/hera", tag = "v1.2.6" }
+logger = { git = "https://github.com/rs-god/hera", tag = "v1.3.0" }
